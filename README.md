@@ -1,4 +1,4 @@
-# 🚀 AI-Powered RAG Chatbot using Endee Vector Database
+#  AI-Powered RAG Chatbot using Endee Vector Database
 
 ## 📌 Project Overview
 
