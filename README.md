@@ -4,6 +4,8 @@
 
 This project implements a **Retrieval-Augmented Generation (RAG)** system using **Endee** as the vector database. It enables users to ask questions from custom documents and receive **accurate, context-aware answers** powered by semantic search and large language models.
 
+> 🚀 This project demonstrates how modern AI systems combine vector databases and LLMs to deliver accurate, real-time, and context-aware responses.
+
 ---
 
 ## 🎯 Problem Statement
@@ -23,12 +25,9 @@ This project solves that problem by:
 * 🔍 Semantic Search using vector embeddings
 * 🤖 RAG-based intelligent Q&A system
 * ⚡ Fast similarity search using Endee
-* 💻 Multiple interfaces:
-
-  * CLI (Command Line)
-  * Streamlit UI
-* 🐳 Docker support for easy setup
+* 🌐 Web-based interface using HTML
 * 📦 Modular and scalable architecture
+* ⚙️ Easy local setup with Endee vector database
 
 ---
 
@@ -43,7 +42,7 @@ Endee Vector Database
     ↓
 Top-K Similar Documents Retrieval
     ↓
-LLM (Claude / OpenAI)
+LLM (OpenAI / Anthropic)
     ↓
 Final Answer (Context-aware)
 ```
@@ -82,7 +81,7 @@ Final Answer (Context-aware)
 Endee is used as the core vector database because it provides:
 
 * ⚡ High-performance vector search
-* 📈 Scalability (handles large datasets efficiently)
+* 📈 Scalability for large datasets
 * 🔍 Accurate similarity matching
 * 🧩 Easy integration with AI pipelines
 
@@ -94,21 +93,39 @@ In this project, Endee is responsible for:
 
 ---
 
+## 🛠️ Tech Stack
+
+* Python
+* Endee (Vector Database)
+* Sentence Transformers
+* OpenAI / Anthropic (LLM)
+* HTML (Frontend UI)
+
+---
+
 ## 📂 Project Structure
 
 ```
-endee/
-│── app/
-│   ├── rag_engine.py      # Core RAG logic
-│   ├── app.py             # Streamlit UI
-│   ├── cli.py             # CLI interface
-│   ├── demo.py            # Demo script
-│   └── data/              # Sample documents
+rag-with-endee/
+│── screenshots/              # UI screenshots
+│   ├── UI.png
+│   ├── Document.png
+│   ├── UPLOAD.png
 │
-│── Dockerfile
-│── docker-compose.yml
+│── static/
+│   └── index.html           # Frontend UI
+│
+│── api.py                   # API endpoints
+│── rag.py                   # RAG pipeline logic
+│── embedder.py              # Embedding generation
+│── endee_client.py          # Endee DB interaction
+│── ingest.py                # Data ingestion
+│── mock_endee_server.py     # Local mock server (if used)
+│
 │── requirements.txt
 │── README.md
+│── .env
+│── .gitignore
 ```
 
 ---
@@ -118,8 +135,8 @@ endee/
 ### 🔹 1. Clone Repository
 
 ```
-git clone https://github.com/YOUR_USERNAME/endee.git
-cd endee
+git clone https://github.com/YOUR_USERNAME/rag-with-endee.git
+cd rag-with-endee
 ```
 
 ---
@@ -131,7 +148,7 @@ python -m venv venv
 venv\Scripts\activate   # Windows
 
 pip install -r requirements.txt
-pip install sentence-transformers fastapi uvicorn streamlit python-dotenv
+pip install sentence-transformers python-dotenv
 ```
 
 ---
@@ -147,26 +164,27 @@ ANTHROPIC_API_KEY=your_api_key
 
 ---
 
-### 🔹 4. Run Endee (Docker)
+### 🔹 4. Run Endee Server
 
-```
-docker-compose up
-```
+Ensure Endee vector database server is running locally.
+
+👉 Refer to official setup:
+https://github.com/endee-io/endee
 
 ---
 
 ### 🔹 5. Run Application
 
-#### ▶️ Streamlit UI
+Start the backend server:
 
 ```
-streamlit run app/app.py
+python api.py
 ```
 
-#### ▶️ CLI Mode
+Then open in browser:
 
 ```
-python app/cli.py
+http://localhost:8000
 ```
 
 ---
@@ -186,25 +204,27 @@ What is the difference between stack and queue?
 
 ## 📸 Screenshots
 
-### 🔹 Streamlit UI  
-User asking a question and receiving an AI-generated response  
+### 🔹 Streamlit / Web UI
 
-![Streamlit UI](screenshots/ui.png)
+User asking a question and receiving an AI-generated response
 
----
-
-### 🔹 Upload Interface  
-Adding new documents to the knowledge base  
-
-![Upload](screenshots/upload.png)
+![UI](screenshots/UI.png)
 
 ---
 
-### 🔹 Document Index View  
-Displaying all indexed documents stored in Endee  
+### 🔹 Upload Interface
 
-![Documents](screenshots/documents.png)
+Adding new documents to the knowledge base
 
+![Upload](screenshots/UPLOAD.png)
+
+---
+
+### 🔹 Document Index View
+
+Displaying all indexed documents stored in Endee
+
+![Documents](screenshots/Document.png)
 
 ---
 
