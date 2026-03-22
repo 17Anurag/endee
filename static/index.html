@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RAG System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #FFB347;
+      --primary-dark: #f59e0b;
+      --primary-light: #fff8ee;
+      --bg: #f9fafb;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #3b82f6;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 10px; }
+
+    .logo {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      box-shadow: 0 2px 6px rgba(255,179,71,0.4);
+    }
+
+    .brand { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .brand span { color: var(--primary-dark); }
+
+    .header-right {
+      display: flex; align-items: center; gap: 6px;
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+    .status-dot.red { background: #ef4444; }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      gap: 4px;
+      padding: 12px 32px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.15s;
+      user-select: none;
+      border: 1px solid transparent;
+    }
+    .tab:hover { background: #f3f4f6; color: var(--text); }
+    .tab.active {
+      background: var(--primary-light);
+      color: #92400e;
+      border-color: #fde68a;
+    }
+    .tab svg { width: 14px; height: 14px; }
+
+    /* ── Main ── */
+    main { flex: 1; padding: 32px 16px; display: flex; justify-content: center; }
+
+    .panel { width: 100%; max-width: 780px; display: none; }
+    .panel.active { display: block; }
+
+    /* ── Page title ── */
+    .page-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .page-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    }
+
+    /* ── Textarea / Input ── */
+    textarea, input[type="text"], select {
+      width: 100%;
+      background: #f9fafb;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 0.93rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea { resize: vertical; min-height: 120px; }
+    textarea:focus, input[type="text"]:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255,179,71,0.15);
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      width: 100%;
+      margin-top: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+      box-shadow: 0 2px 8px rgba(255,179,71,0.35);
+    }
+    .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-upload {
+      width: 100%;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-upload:hover { background: #374151; }
+    .btn-upload:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Answer section ── */
+    #searchResult { margin-top: 24px; display: none; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+
+    .result-header {
+      background: linear-gradient(135deg, var(--primary-light), #fff);
+      border-bottom: 1px solid #fde68a;
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #92400e;
+    }
+
+    .answer-body {
+      padding: 20px;
+      line-height: 1.8;
+      font-size: 0.93rem;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+
+    .sources-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .source-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+    .source-card:hover { border-color: var(--primary); }
+
+    .source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .source-num { font-size: 0.72rem; font-weight: 700; color: var(--primary-dark); background: var(--primary-light); border-radius: 4px; padding: 2px 7px; }
+    .source-title { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+    .score-badge { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; color: #1d4ed8; font-weight: 600; }
+    .source-text { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── Documents ── */
+    .doc-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: box-shadow 0.15s;
+    }
+    .doc-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .doc-info h3 { font-size: 0.92rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .doc-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tag { background: var(--primary-light); border: 1px solid #fde68a; border-radius: 5px; padding: 2px 8px; font-size: 0.71rem; font-weight: 600; color: #92400e; }
+    .doc-meta-text { font-size: 0.77rem; color: var(--muted); }
+    .doc-icon { font-size: 1.4rem; opacity: 0.4; }
+
+    /* ── Toast ── */
+    .toast { margin-top: 14px; padding: 11px 16px; border-radius: 10px; font-size: 0.85rem; display: none; font-weight: 500; }
+    .toast.success { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; }
+    .toast.error   { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    footer a { color: var(--primary-dark); text-decoration: none; font-weight: 500; }
+
+    /* ── Spinner ── */
+    .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">🗄</div>
+    <span class="brand">RAG <span>System</span></span>
+  </div>
+  <div class="header-right">
+    <div class="status-dot" id="statusDot"></div>
+    <span>Endee</span>
+    <span id="docCount">—</span>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" data-tab="search" onclick="switchTab('search')">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.868-3.834zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+    Search
+  </div>
+  <div class="tab" data-tab="upload" onclick="switchTab('upload')">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+    Upload
+  </div>
+  <div class="tab" data-tab="documents" onclick="switchTab('documents')">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/></svg>
+    Documents
+  </div>
+</nav>
+
+<main>
+
+  <!-- Search -->
+  <div class="panel active" id="tab-search">
+    <div class="page-title">Ask a Question</div>
+    <div class="page-sub">Search across your knowledge base using semantic similarity</div>
+    <div class="card">
+      <textarea id="question" placeholder="e.g. What is RAG? How does vector search work?"></textarea>
+      <button class="btn-primary" id="searchBtn" onclick="doSearch()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.868-3.834zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+        Search
+      </button>
+    </div>
+
+    <div id="searchResult">
+      <div class="result-card">
+        <div class="result-header">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+          Answer
+        </div>
+        <div class="answer-body" id="answerText"></div>
+      </div>
+      <div class="sources-label">Retrieved Sources</div>
+      <div id="sourcesGrid"></div>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="panel" id="tab-upload">
+    <div class="page-title">Upload Document</div>
+    <div class="page-sub">Add new content to your knowledge base</div>
+    <div class="card">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="docTitle" placeholder="Enter document title" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="docCategory">
+          <option value="general">General</option>
+          <option value="technology">Technology</option>
+          <option value="ai">AI</option>
+          <option value="science">Science</option>
+          <option value="business">Business</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Content</label>
+        <textarea id="docContent" placeholder="Paste your document content here..." style="min-height:180px;"></textarea>
+      </div>
+      <button class="btn-upload" id="uploadBtn" onclick="doUpload()">Upload Document</button>
+      <div class="toast" id="uploadToast"></div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="panel" id="tab-documents">
+    <div class="page-title">All Documents</div>
+    <div class="page-sub">Documents currently indexed in Endee</div>
+    <div id="docList"><p style="color:#6b7280;font-size:.85rem;">Loading…</p></div>
+  </div>
+
+</main>
+
+<footer>
+  Built with <a href="https://github.com/endee-io/endee" target="_blank">Endee Vector Database</a> &bull; RAG System for Semantic Search
+</footer>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+    if (name === 'documents') loadDocuments();
+  }
+
+  async function checkHealth() {
+    try {
+      await fetch('/health');
+      document.getElementById('statusDot').classList.remove('red');
+    } catch { document.getElementById('statusDot').classList.add('red'); }
+    try {
+      const r = await fetch('/documents');
+      const d = await r.json();
+      document.getElementById('docCount').textContent = d.total + ' docs';
+    } catch {}
+  }
+
+  document.getElementById('question').addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) doSearch(); });
+
+  async function doSearch() {
+    const q = document.getElementById('question').value.trim();
+    if (!q) return;
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Searching…';
+    document.getElementById('searchResult').style.display = 'none';
+    try {
+      const resp = await fetch('/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q }) });
+      if (!resp.ok) throw new Error((await resp.json()).detail || 'Error');
+      const data = await resp.json();
+      let answer = data.answer.replace(/^\(Retrieval-only mode[^)]*\)\s*/i, '').trim();
+      document.getElementById('answerText').textContent = answer;
+      const grid = document.getElementById('sourcesGrid');
+      grid.innerHTML = '';
+      data.sources.forEach((src, i) => {
+        const pct = Math.round(src.score * 100);
+        const excerpt = src.text.length > 220 ? src.text.slice(0, 220) + '…' : src.text;
+        grid.innerHTML += `<div class="source-card"><div class="source-header"><div style="display:flex;align-items:center;gap:8px;"><span class="source-num">#${i+1}</span><span class="source-title">${src.title}</span></div><span class="score-badge">${pct}% match</span></div><div class="source-text">${excerpt}</div></div>`;
+      });
+      document.getElementById('searchResult').style.display = 'block';
+    } catch (err) {
+      document.getElementById('answerText').textContent = 'Error: ' + err.message;
+      document.getElementById('searchResult').style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.868-3.834zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg> Search';
+    }
+  }
+
+  async function doUpload() {
+    const title = document.getElementById('docTitle').value.trim();
+    const category = document.getElementById('docCategory').value;
+    const content = document.getElementById('docContent').value.trim();
+    const btn = document.getElementById('uploadBtn');
+    if (!title || !content) { showToast('Title and content are required.', 'error'); return; }
+    btn.disabled = true; btn.textContent = 'Uploading…';
+    try {
+      const resp = await fetch('/ingest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, category, content }) });
+      if (!resp.ok) throw new Error((await resp.json()).detail || 'Upload failed');
+      const d = await resp.json();
+      showToast(`✓ "${d.title}" ingested (${d.ingested} chunks)`, 'success');
+      document.getElementById('docTitle').value = '';
+      document.getElementById('docContent').value = '';
+      checkHealth();
+    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Upload Document'; }
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('uploadToast');
+    t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+  }
+
+  async function loadDocuments() {
+    const list = document.getElementById('docList');
+    try {
+      const r = await fetch('/documents');
+      const d = await r.json();
+      if (!d.documents.length) { list.innerHTML = '<p style="color:#6b7280;font-size:.85rem;">No documents yet.</p>'; return; }
+      list.innerHTML = d.documents.map(doc => `
+        <div class="doc-item">
+          <div class="doc-info">
+            <h3>${doc.title}</h3>
+            <div class="doc-meta">
+              <span class="tag">${doc.category}</span>
+              <span class="doc-meta-text">${doc.chunks} chunks</span>
+              <span class="doc-meta-text">${doc.date}</span>
+            </div>
+          </div>
+          <div class="doc-icon">📄</div>
+        </div>`).join('');
+    } catch { list.innerHTML = '<p style="color:#ef4444;font-size:.85rem;">Failed to load.</p>'; }
+  }
+
+  checkHealth();
+</script>
+</body>
+</html>
