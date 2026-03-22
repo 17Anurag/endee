@@ -1,4 +1,4 @@
-#  AI-Powered RAG Chatbot using Endee Vector Database
+# 🚀 AI-Powered RAG Chatbot using Endee Vector Database
 
 ## 📌 Project Overview
 
@@ -25,7 +25,7 @@ This project solves that problem by:
 * 🔍 Semantic Search using vector embeddings
 * 🤖 RAG-based intelligent Q&A system
 * ⚡ Fast similarity search using Endee
-* 🌐 Web-based interface using HTML
+* 🌐 Web-based interface using HTML & CSS
 * 📦 Modular and scalable architecture
 * ⚙️ Easy local setup with Endee vector database
 
@@ -99,7 +99,7 @@ In this project, Endee is responsible for:
 * Endee (Vector Database)
 * Sentence Transformers
 * OpenAI / Anthropic (LLM)
-* HTML (Frontend UI)
+* HTML & CSS (Frontend UI)
 
 ---
 
@@ -113,7 +113,8 @@ rag-with-endee/
 │   ├── UPLOAD.png
 │
 │── static/
-│   └── index.html           # Frontend UI
+│   ├── index.html           # Frontend UI
+│   └── style.css            # Styling for UI
 │
 │── api.py                   # API endpoints
 │── rag.py                   # RAG pipeline logic
@@ -204,7 +205,7 @@ What is the difference between stack and queue?
 
 ## 📸 Screenshots
 
-### 🔹 Streamlit / Web UI
+### 🔹 Web UI
 
 User asking a question and receiving an AI-generated response
 
