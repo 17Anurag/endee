@@ -250,12 +250,6 @@ It highlights:
 
 ---
 
-## 👨‍💻 Author
-
-**Anurag Kumar**
-MCA Student | Aspiring Data Scientist
-
----
 
 ## ⭐ Acknowledgment
 
